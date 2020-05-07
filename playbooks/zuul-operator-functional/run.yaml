@@ -6,8 +6,8 @@
         - not use_local_role | default(false) | bool
       shell: |
         set -e
-        JSON_TO_DHALL="{{ container_runtime }} run -v $(pwd)/conf:/conf:Z --rm --entrypoint json-to-dhall -i docker.io/zuul/zuul-operator"
-        DHALL_TO_YAML="{{ container_runtime }} run -v $(pwd)/conf:/conf:Z --rm --entrypoint dhall-to-yaml -i docker.io/zuul/zuul-operator"
+        JSON_TO_DHALL="{{ container_runtime }} run -v $(pwd)/conf:/conf:Z --rm --entrypoint json-to-dhall -i {{ org }}/zuul-operator"
+        DHALL_TO_YAML="{{ container_runtime }} run -v $(pwd)/conf:/conf:Z --rm --entrypoint dhall-to-yaml -i {{ org }}/zuul-operator"
         JSON=$(python3 -c 'import yaml, json; print(json.dumps(yaml.safe_load(open("playbooks/files/cr_spec.yaml"))))')
         INPUT=$(echo $JSON | $JSON_TO_DHALL '(/conf/zuul/input.dhall).Input.Type')
         echo '(/conf/zuul/resources.dhall ('$INPUT')).List' | $DHALL_TO_YAML > ~/zuul-output/logs/cr_spec-resources.yaml

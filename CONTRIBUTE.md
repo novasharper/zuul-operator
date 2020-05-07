@@ -27,8 +27,9 @@ Or use the zuul-operator image:
 
 ```bash
 CR="podman"
-alias dhall-to-yaml="$CR run --rm --entrypoint dhall-to-yaml -i docker.io/zuul/zuul-operator"
-alias yaml-to-dhall="$CR run --rm --entrypoint yaml-to-dhall -i docker.io/zuul/zuul-operator"
+ORG="docker.io/zuul"
+alias dhall-to-yaml="$CR run --rm --entrypoint dhall-to-yaml -i $ORG/zuul-operator"
+alias yaml-to-dhall="$CR run --rm --entrypoint yaml-to-dhall -i $ORG/zuul-operator"
 ```
 
 ## Evaluate the dhall expression manually
