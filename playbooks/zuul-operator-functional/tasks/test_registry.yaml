@@ -15,7 +15,7 @@
 
 - name: Test registry login
   command: >
-    podman login
+    docker login
       --tls-verify=false registry:9000
       -u zuul
       -p "{{ _registry_password.stdout_lines[0] | b64decode }}"
