@@ -43,7 +43,9 @@ in      \(app-name : Text)
                 , count = F.defaultNat input-registry.count 0
                 , data-dir = data-dir
                 , volumes = volumes # registry-volumes app-name
-                , claim-size = F.defaultNat input-registry.storage-size 20
+                , claim = Some F.VolumeClaim::{
+                  , size = F.defaultNat input-registry.storage-size 20
+                  }
                 , container = Kubernetes.Container::{
                   , name = "registry"
                   , image = input-registry.image

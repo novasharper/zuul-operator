@@ -30,7 +30,6 @@ in      \(app-name : Text)
                             jobVolumes
 
                     in  job-volumes
-                , claim-size = 0
                 , container = Kubernetes.Container::{
                   , name = "executor"
                   , image = input-executor.image

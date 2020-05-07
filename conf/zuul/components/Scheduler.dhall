@@ -19,7 +19,9 @@ in      \(app-name : Text)
                 , count = 1
                 , data-dir = data-dir
                 , volumes = volumes
-                , claim-size = 5
+                , claim = Some F.VolumeClaim::{
+                  , size = 5
+                  }
                 , container = Kubernetes.Container::{
                   , name = "scheduler"
                   , image = input-scheduler.image

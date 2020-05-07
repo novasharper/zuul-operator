@@ -22,7 +22,9 @@ in      \(app-name : Text)
                 , count = 1
                 , data-dir = data-volumes
                 , volumes = client-conf
-                , claim-size = 1
+                , claim = Some F.VolumeClaim::{
+                  , size = 1
+                  }
                 , container = Kubernetes.Container::{
                   , name = "zk"
                   , command = Some

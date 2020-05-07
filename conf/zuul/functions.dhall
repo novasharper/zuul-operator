@@ -106,6 +106,17 @@ let Volume =
       , default.files = [] : List File
       }
 
+let VolumeClaim =
+      { Type =
+          { size : Natural
+          , access-mode : Text
+          }
+      , default =
+          { size = 0
+          , access-mode = "ReadWriteOnce"
+          }
+      }
+
 let {- A high level description of a component such as the scheduler or the launcher
     -} Component =
       { Type =
@@ -115,13 +126,13 @@ let {- A high level description of a component such as the scheduler or the laun
           , data-dir : List Volume.Type
           , volumes : List Volume.Type
           , extra-volumes : List Kubernetes.Volume.Type
-          , claim-size : Natural
+          , claim : Optional VolumeClaim.Type
           }
       , default =
           { data-dir = [] : List Volume.Type
           , volumes = [] : List Volume.Type
           , extra-volumes = [] : List Kubernetes.Volume.Type
-          , claim-size = 0
+          , claim = None VolumeClaim.Type
           }
       }
 
@@ -188,30 +199,32 @@ let mkStatefulSet =
           let component-name = app-name ++ "-" ++ component.name
 
           let claim =
-                      if Natural/isZero component.claim-size
-
-                then  [] : List Kubernetes.PersistentVolumeClaim.Type
-
-                else  [ Kubernetes.PersistentVolumeClaim::{
-                        , apiVersion = ""
-                        , kind = ""
-                        , metadata = Kubernetes.ObjectMeta::{
-                          , name = component-name
-                          }
-                        , spec = Some Kubernetes.PersistentVolumeClaimSpec::{
-                          , accessModes = Some [ "ReadWriteOnce" ]
-                          , resources = Some Kubernetes.ResourceRequirements::{
-                            , requests = Some
-                                ( toMap
-                                    { storage =
-                                            Natural/show component.claim-size
-                                        ++  "Gi"
-                                    }
-                                )
+              merge
+                { None = [] : List Kubernetes.PersistentVolumeClaim.Type
+                , Some =
+                        \(claim : VolumeClaim.Type)
+                     -> [ Kubernetes.PersistentVolumeClaim::{
+                          , apiVersion = ""
+                          , kind = ""
+                          , metadata = Kubernetes.ObjectMeta::{
+                            , name = component-name
+                            }
+                          , spec = Some Kubernetes.PersistentVolumeClaimSpec::{
+                            , accessModes = Some [ claim.access-mode ]
+                            , resources = Some Kubernetes.ResourceRequirements::{
+                              , requests = Some
+                                  ( toMap
+                                      { storage =
+                                              Natural/show claim.size
+                                          ++  "Gi"
+                                      }
+                                  )
+                              }
                             }
                           }
-                        }
-                      ]
+                        ]
+                }
+                component.claim
 
           in  Kubernetes.StatefulSet::{
               , metadata = mkObjectMeta component-name labels
@@ -296,6 +309,7 @@ in  { defaultNat = defaultNat
     , Label = Label
     , Labels = Labels
     , Volume = Volume
+    , VolumeClaim = VolumeClaim
     , Component = Component
     , KubernetesComponent = KubernetesComponent
     }

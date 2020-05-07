@@ -17,7 +17,9 @@ in      \(app-name : Text)
                 , name = "db"
                 , count = 1
                 , data-dir = db-volumes
-                , claim-size = 1
+                , claim = Some F.VolumeClaim::{
+                  , size = 1
+                  }
                 , container = Kubernetes.Container::{
                   , name = "db"
                   , image = Some "docker.io/library/postgres:12.1"
