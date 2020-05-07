@@ -109,10 +109,12 @@ let Volume =
 let VolumeClaim =
       { Type =
           { size : Natural
+          , class : Optional Text
           , access-mode : Text
           }
       , default =
           { size = 0
+          , class = None Text
           , access-mode = "ReadWriteOnce"
           }
       }
@@ -198,7 +200,7 @@ let mkStatefulSet =
 
           let component-name = app-name ++ "-" ++ component.name
 
-          let claim =
+          let claim-spec =
               merge
                 { None = [] : List Kubernetes.PersistentVolumeClaim.Type
                 , Some =
@@ -211,6 +213,7 @@ let mkStatefulSet =
                             }
                           , spec = Some Kubernetes.PersistentVolumeClaimSpec::{
                             , accessModes = Some [ claim.access-mode ]
+                            , storageClassName = claim.class
                             , resources = Some Kubernetes.ResourceRequirements::{
                               , requests = Some
                                   ( toMap
@@ -233,7 +236,7 @@ let mkStatefulSet =
                 , replicas = Some component.count
                 , selector = mkSelector labels
                 , template = mkPodTemplateSpec component labels
-                , volumeClaimTemplates = Some claim
+                , volumeClaimTemplates = Some claim-spec
                 }
               }
 
