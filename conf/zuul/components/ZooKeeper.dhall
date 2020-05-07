@@ -12,6 +12,7 @@ let data-volumes =
 
 in      \(app-name : Text)
     ->  \(client-conf : List F.Volume.Type)
+    ->  \(storage-class : Optional Text)
     ->  F.KubernetesComponent::{
         , Service = Some (F.mkService app-name "zk" "zk" 2281)
         , StatefulSet = Some
@@ -24,6 +25,7 @@ in      \(app-name : Text)
                 , volumes = client-conf
                 , claim = Some F.VolumeClaim::{
                   , size = 1
+                  , class = storage-class
                   }
                 , container = Kubernetes.Container::{
                   , name = "zk"

@@ -8,6 +8,7 @@ in      \(app-name : Text)
     ->  \ ( db-internal-password-env
           : forall (env-name : Text) -> List Kubernetes.EnvVar.Type
           )
+    ->  \(storage-class : Optional Text)
     ->  F.KubernetesComponent::{
         , Service = Some (F.mkService app-name "db" "pg" 5432)
         , StatefulSet = Some
@@ -19,6 +20,7 @@ in      \(app-name : Text)
                 , data-dir = db-volumes
                 , claim = Some F.VolumeClaim::{
                   , size = 1
+                  , class = storage-class
                   }
                 , container = Kubernetes.Container::{
                   , name = "db"

@@ -9,6 +9,7 @@ in      \(app-name : Text)
     ->  \(data-dir : List F.Volume.Type)
     ->  \(volumes : List F.Volume.Type)
     ->  \(env : List Kubernetes.EnvVar.Type)
+    ->  \(storage-class : Optional Text)
     ->  F.KubernetesComponent::{
         , Service = Some (F.mkService app-name "scheduler" "gearman" 4730)
         , StatefulSet = Some
@@ -21,6 +22,7 @@ in      \(app-name : Text)
                 , volumes = volumes
                 , claim = Some F.VolumeClaim::{
                   , size = 5
+                  , class = storage-class
                   }
                 , container = Kubernetes.Container::{
                   , name = "scheduler"

@@ -285,6 +285,7 @@ in      \(input : Input)
                             ./components/Database.dhall
                               input.name
                               db-internal-password-env
+                              input.storageClassName
                         , Some =
                                 \(some : UserSecret)
                             ->  F.KubernetesComponent.default
@@ -296,6 +297,7 @@ in      \(input : Input)
                             ./components/ZooKeeper.dhall
                               input.name
                               (zk-conf.ClientVolumes # zk-conf.ServiceVolumes)
+                              input.storageClassName
                         , Some =
                                 \(some : UserSecret)
                             ->  F.KubernetesComponent.default
@@ -361,6 +363,7 @@ in      \(input : Input)
                             zuul-data-dir
                             (zuul-volumes # [ sched-config ])
                             (zuul-env # db-secret-env # zk-conf.Env)
+                            input.storageClassName
                       , Executor =
                           ./components/Executor.dhall
                             input.name
@@ -395,6 +398,7 @@ in      \(input : Input)
                             )
                             zuul-data-dir
                             [ etc-zuul-registry ]
+                            input.storageClassName
                       , Preview =
                           ./components/Preview.dhall
                             input.name

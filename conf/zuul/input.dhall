@@ -156,6 +156,7 @@ let Input =
           , connections : Schemas.Connections.Type
           , jobVolumes : Optional (List JobVolume)
           , withCertManager : Bool
+          , storageClassName : Optional Text
           }
       , default =
           { imagePrefix = None Text
@@ -172,6 +173,7 @@ let Input =
           , connections = Schemas.Connections.default
           , jobVolumes = None (List JobVolume)
           , withCertManager = True
+          , storageClassName = None Text
           }
       }
 

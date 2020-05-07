@@ -33,6 +33,7 @@ in      \(app-name : Text)
     ->  \(input-registry : InputRegistry)
     ->  \(data-dir : List F.Volume.Type)
     ->  \(volumes : List F.Volume.Type)
+    ->  \(storage-class : Optional Text)
     ->  F.KubernetesComponent::{
         , Service = Some (F.mkService app-name "registry" "registry" 9000)
         , StatefulSet = Some
@@ -45,6 +46,7 @@ in      \(app-name : Text)
                 , volumes = volumes # registry-volumes app-name
                 , claim = Some F.VolumeClaim::{
                   , size = F.defaultNat input-registry.storage-size 20
+                  , class = storage-class
                   }
                 , container = Kubernetes.Container::{
                   , name = "registry"
