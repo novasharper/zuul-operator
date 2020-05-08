@@ -381,7 +381,10 @@ in      \(input : Input)
                       , Web =
                           ./components/Web.dhall
                             input.name
-                            (input.web // zuul-image "web" input.web.image)
+                            (     input.web
+                              //  zuul-image "web" input.web.image
+                              //  { proxy-id = input.ambassador_id }
+                            )
                             zuul-data-dir
                             zuul-volumes
                             (zuul-env # db-secret-env # zk-conf.Env)

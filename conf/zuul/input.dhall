@@ -68,11 +68,15 @@ let Schemas =
               { image : Optional Text
               , count : Optional Natural
               , status_url : Optional Text
+              , public-url : Optional Text
+              , proxy-id : Optional Text
               }
           , default =
               { image = None Text
               , count = None Natural
               , status_url = None Text
+              , public-url = None Text
+              , proxy-id = None Text
               }
           }
       , Scheduler =
@@ -157,6 +161,7 @@ let Input =
           , jobVolumes : Optional (List JobVolume)
           , withCertManager : Bool
           , storageClassName : Optional Text
+          , ambassador_id : Optional Text
           }
       , default =
           { imagePrefix = None Text
@@ -174,6 +179,7 @@ let Input =
           , jobVolumes = None (List JobVolume)
           , withCertManager = True
           , storageClassName = None Text
+          , ambassador_id = None Text
           }
       }
 
