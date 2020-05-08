@@ -3,6 +3,8 @@ let Prelude = ../Prelude.dhall
 
 let Kubernetes = ../Kubernetes.dhall
 
+let Ambassador = ../Ambassador.dhall
+
 let Schemas = ./input.dhall
 
 let JobVolume = Schemas.JobVolume.Type
@@ -67,7 +69,10 @@ let Labels = List Label
 let mkObjectMeta =
           \(name : Text)
       ->  \(labels : Labels)
-      ->  Kubernetes.ObjectMeta::{ name = name, labels = Some labels }
+      ->  Kubernetes.ObjectMeta::{
+          , name = name
+          , labels = Some labels
+          }
 
 let mkSelector =
           \(labels : Labels)
@@ -95,6 +100,26 @@ let mkService =
                     }
                   ]
                 }
+              }
+
+let mkMapping =
+          \(app-name : Text)
+      ->  \(name : Text)
+      ->  \(port : Natural)
+      ->  \(spec : Ambassador.MappingOptions.Type)
+      ->  let labels = mkComponentLabel app-name name
+
+          let service = name ++ ":" ++ Natural/show port
+
+          in  Ambassador.Mapping::{
+              , metadata = mkObjectMeta name labels
+              , spec = Some
+                (    Ambassador.MappingSpec::{
+                      , prefix = Some "/"
+                      , service = Some (name ++ ":" ++ Natural/show port)
+                      }
+                  // spec
+                )
               }
 
 let EnvSecret = { name : Text, secret : Text, key : Text }
@@ -144,11 +169,15 @@ let {- The Kubernetes resources of a Component
           { Service : Optional Kubernetes.Service.Type
           , Deployment : Optional Kubernetes.Deployment.Type
           , StatefulSet : Optional Kubernetes.StatefulSet.Type
+          , Mapping : Optional Ambassador.Mapping.Type
+          , TCPMapping : Optional Ambassador.TCPMapping.Type
           }
       , default =
           { Service = None Kubernetes.Service.Type
           , Deployment = None Kubernetes.Deployment.Type
           , StatefulSet = None Kubernetes.StatefulSet.Type
+          , Mapping = None Ambassador.Mapping.Type
+          , TCPMapping = None Ambassador.TCPMapping.Type
           }
       }
 
@@ -303,6 +332,7 @@ in  { defaultNat = defaultNat
     , mkObjectMeta = mkObjectMeta
     , mkSelector = mkSelector
     , mkService = mkService
+    , mkMapping = mkMapping
     , mkDeployment = mkDeployment
     , mkStatefulSet = mkStatefulSet
     , mkVolumeMount = mkVolumeMount

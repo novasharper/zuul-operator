@@ -40,6 +40,8 @@ let Prelude = ../Prelude.dhall
 
 let Kubernetes = ../Kubernetes.dhall
 
+let Ambassador = ../Ambassador.dhall
+
 let CertManager = ../CertManager.dhall
 
 let Types = ../Types.dhall
@@ -565,6 +567,37 @@ in      \(input : Input)
                   ->  Types.Union.Kubernetes resource
                 )
 
+        let {- This function transforms the different types into an Ambassador.Resource
+               union to enable using them inside a single List array
+            -} mkAmbassadorUnion =
+                  \(component : F.KubernetesComponent.Type)
+              ->  let empty = [] : List Ambassador.Resource
+
+                  in    merge
+                          { None = empty
+                          , Some =
+                                  \(some : Ambassador.Mapping.Type)
+                              ->  [ Ambassador.Resource.Mapping some ]
+                          }
+                          component.Mapping
+                      # merge
+                          { None = empty
+                          , Some =
+                                  \(some : Ambassador.TCPMapping.Type)
+                              ->  [ Ambassador.Resource.TCPMapping some ]
+                          }
+                          component.TCPMapping
+
+        let {- This function transforms the Ambassador.Resource type into the new Union
+               that combines Kubernetes, Ambassador, and CertManager resources
+            -} transformAmbassadorResource =
+              Prelude.List.map
+                Ambassador.Resource
+                Types.Union
+                (     \(resource : Ambassador.Resource)
+                  ->  Types.Union.Ambassador resource
+                )
+
         let {- if cert-manager is enabled, then includes and transforms the CertManager types
                into the new Union that combines Kubernetes, ambassador, and CertManager resources
             -} all-certificates =
@@ -606,6 +639,17 @@ in      \(input : Input)
                           # mkK8sUnion Components.Zuul.Registry
                           # mkK8sUnion Components.Zuul.Preview
                           # mkK8sUnion Components.Nodepool.Launcher
+                        )
+                    # transformAmbassadorResource
+                        (   mkAmbassadorUnion Components.Backend.Database
+                          # mkAmbassadorUnion Components.Backend.ZooKeeper
+                          # mkAmbassadorUnion Components.Zuul.Scheduler
+                          # mkAmbassadorUnion Components.Zuul.Executor
+                          # mkAmbassadorUnion Components.Zuul.Web
+                          # mkAmbassadorUnion Components.Zuul.Merger
+                          # mkAmbassadorUnion Components.Zuul.Registry
+                          # mkAmbassadorUnion Components.Zuul.Preview
+                          # mkAmbassadorUnion Components.Nodepool.Launcher
                         )
                 }
             }
