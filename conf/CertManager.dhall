@@ -50,15 +50,8 @@ let Certificate =
           { apiVersion = "cert-manager.io/v1alpha3", kind = "Certificate" }
       }
 
-let Union =
-      < Kubernetes : Kubernetes.Resource
-      | Issuer : Issuer.Type
-      | Certificate : Certificate.Type
-      >
-
 in  { IssuerSpec = IssuerSpec
     , Issuer = Issuer
     , CertificateSpec = CertificateSpec
     , Certificate = Certificate
-    , Union = Union
     }

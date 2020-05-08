@@ -42,6 +42,8 @@ let Kubernetes = ../Kubernetes.dhall
 
 let CertManager = ../CertManager.dhall
 
+let Types = ../Types.dhall
+
 let Schemas = ./input.dhall
 
 let F = ./functions.dhall
@@ -527,7 +529,7 @@ in      \(input : Input)
 
         let {- This function transforms the different types into the Kubernetes.Resource
                union to enable using them inside a single List array
-            -} mkUnion =
+            -} mkK8sUnion =
                   \(component : F.KubernetesComponent.Type)
               ->  let empty = [] : List Kubernetes.Resource
 
@@ -553,33 +555,33 @@ in      \(input : Input)
                           }
                           component.Deployment
 
-        let {- This function transform the Kubernetes.Resources type into the new Union
-               that combines Kubernetes and CertManager resources
+        let {- This function transforms the Kubernetes.Resources type into the new Union
+               that combines Kubernetes, Ambassador, and CertManager resources
             -} transformKubernetesResource =
               Prelude.List.map
                 Kubernetes.Resource
-                CertManager.Union
+                Types.Union
                 (     \(resource : Kubernetes.Resource)
-                  ->  CertManager.Union.Kubernetes resource
+                  ->  Types.Union.Kubernetes resource
                 )
 
         let {- if cert-manager is enabled, then includes and transforms the CertManager types
-               into the new Union that combines Kubernetes and CertManager resources
+               into the new Union that combines Kubernetes, ambassador, and CertManager resources
             -} all-certificates =
                     if input.withCertManager
 
               then    Prelude.List.map
                         CertManager.Issuer.Type
-                        CertManager.Union
-                        CertManager.Union.Issuer
+                        Types.Union
+                        Types.Union.Issuer
                         Components.CertManager.Issuers
                     # Prelude.List.map
                         CertManager.Certificate.Type
-                        CertManager.Union
-                        CertManager.Union.Certificate
+                        Types.Union
+                        Types.Union.Certificate
                         Components.CertManager.Certificates
 
-              else  [] : List CertManager.Union
+              else  [] : List Types.Union
 
         in  { Components = Components
             , List =
@@ -595,15 +597,15 @@ in      \(input : Input)
                               (   zk-conf.ServiceVolumes
                                 # [ etc-zuul, etc-nodepool, etc-zuul-registry ]
                               )
-                          # mkUnion Components.Backend.Database
-                          # mkUnion Components.Backend.ZooKeeper
-                          # mkUnion Components.Zuul.Scheduler
-                          # mkUnion Components.Zuul.Executor
-                          # mkUnion Components.Zuul.Web
-                          # mkUnion Components.Zuul.Merger
-                          # mkUnion Components.Zuul.Registry
-                          # mkUnion Components.Zuul.Preview
-                          # mkUnion Components.Nodepool.Launcher
+                          # mkK8sUnion Components.Backend.Database
+                          # mkK8sUnion Components.Backend.ZooKeeper
+                          # mkK8sUnion Components.Zuul.Scheduler
+                          # mkK8sUnion Components.Zuul.Executor
+                          # mkK8sUnion Components.Zuul.Web
+                          # mkK8sUnion Components.Zuul.Merger
+                          # mkK8sUnion Components.Zuul.Registry
+                          # mkK8sUnion Components.Zuul.Preview
+                          # mkK8sUnion Components.Nodepool.Launcher
                         )
                 }
             }
